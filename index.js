@@ -25,24 +25,6 @@ try {
 // Add all accounts to the config
 config.accounts = require("./accounts.json");
 
-console.log(colors.general + "Getting " + config.CommendsToSend + " account" + (config.CommendsToSend === 1 ? "" : "s"));
-
-// First we get all available accounts (You can commend once every 12 hours)
-let available = config.accounts.filter(a => a.operational === true && a.requiresSteamGuard === false && !a.commended.includes(config.AccountToCommend) && (new Date().getTime() - a.lastCommend) >= config.AccountCooldown);
-
-// Check if we have enough available accounts
-if (available.length < config.CommendsToSend) {
-	console.log(colors.general + available.length + "/" + config.accounts.length + " account" + (config.accounts.length === 1 ? "" : "s") + " available but we need " + config.CommendsToSend + " account" + (config.CommendsToSend === 1 ? "" : "s"));
-	return;
-}
-
-// Get needed accounts
-let accountsToUse = available.slice(0, config.CommendsToSend);
-
-// Split accounts into chunks, do "CommendsPerChunk" at a time
-let chunks = chunkArray(accountsToUse, config.Chunks.CommendsPerChunk);
-let workerChunks = chunkArray(chunks, config.Chunks.WorkersAtOnce);
-
 (async () => {
 	// Parse "AccountToCommend" to accountID
 	console.log(colors.general + "Parsing account from " + config.AccountToCommend);
@@ -59,6 +41,24 @@ let workerChunks = chunkArray(chunks, config.Chunks.WorkersAtOnce);
 	config.AccountToCommend = output.accountid;
 
 	console.log(colors.general + "Successfully parsed account to " + config.AccountToCommend);
+
+	console.log(colors.general + "Getting " + config.CommendsToSend + " account" + (config.CommendsToSend === 1 ? "" : "s"));
+
+	// First we get all available accounts (You can commend once every 12 hours)
+	let available = config.accounts.filter(a => a.operational === true && a.requiresSteamGuard === false && !a.commended.includes(config.AccountToCommend) && (new Date().getTime() - a.lastCommend) >= config.AccountCooldown);
+
+	// Check if we have enough available accounts
+	if (available.length < config.CommendsToSend) {
+		console.log(colors.general + available.length + "/" + config.accounts.length + " account" + (config.accounts.length === 1 ? "" : "s") + " available but we need " + config.CommendsToSend + " account" + (config.CommendsToSend === 1 ? "" : "s"));
+		return;
+	}
+
+	// Get needed accounts
+	let accountsToUse = available.slice(0, config.CommendsToSend);
+
+	// Split accounts into chunks, do "CommendsPerChunk" at a time
+	let chunks = chunkArray(accountsToUse, config.Chunks.CommendsPerChunk);
+	let workerChunks = chunkArray(chunks, config.Chunks.WorkersAtOnce);
 
 	// Wait 5 seconds before starting the actual process
 	await new Promise(r => setTimeout(r, (5 * 1000)));
