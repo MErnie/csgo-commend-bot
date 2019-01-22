@@ -1,6 +1,6 @@
 const Protos = require("./protos.js");
 const Events = require("events");
-const Steam = require("steam");
+const Steam = require("steam-client");
 
 module.exports = class GameCoordinator extends Events {
 	constructor(steamUser) {

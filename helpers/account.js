@@ -1,24 +1,17 @@
 const Events = require("events");
 const SteamUser = require("steam-user");
 const SteamTotp = require("steam-totp");
-const Steam = require("steam-client");
 
 const GameCoordinator = require("./GameCoordinator.js");
 
 module.exports = class Account extends Events {
-	constructor(username, password, sharedSecret = undefined, proxy = undefined, timeout = 60000) {
+	constructor(username, password, sharedSecret = undefined, timeout = 60000) {
 		super();
 
 		// Self reference
 		const self = this;
 
-		this.steamClient = new Steam.CMClient();
-
-		if (proxy) {
-			this.steamClient.setHttpProxy(proxy);
-		}
-
-		this.steamUser = new SteamUser(this.steamClient, {
+		this.steamUser = new SteamUser({
 			promptSteamGuardCode: false
 		});
 		this.csgoUser = new GameCoordinator(this.steamUser);

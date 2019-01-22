@@ -1,7 +1,7 @@
 {
 	"SteamAPIKey": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	"AccountToCommend": "https://steamcommunity.com/id/gabelogannewell/",
-	"CommendsToSend": 5,
+	"CommendsToSend": 400,
 	"Commend": {
 		"Friendly": true,
 		"Teacher": true,
@@ -11,9 +11,9 @@
 	"RateLimitedCooldown": 5400000,
 	"Chunks": {
 		"WorkersAtOnce": 4,
+		"TimeBetweenWorkerChunks": 30000,
 		"CommendsPerChunk": 50,
-		"TimeBetweenWorkerCalls": 60000,
 		"TimeBetweenConnectionAndSending": 2000,
-		"BeautifyDelay": 2000
+		"BeautifyDelay": 1000
 	}
 }

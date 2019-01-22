@@ -10,18 +10,6 @@ const colors = {
 	error: "\x1b[31m"
 };
 
-try {
-	const WorkerThreads = require("worker_threads");
-
-	if (!WorkerThreads.isMainThread) {
-		console.log("You cannot run this bot as Worker");
-		process.exit(1);
-	}
-} catch(err) {
-	console.log("You cannot run this bot without using NodeJS v10 Experimental Workers");
-	process.exit(1);
-}
-
 // Add all accounts to the config
 config.accounts = require("./accounts.json");
 
@@ -58,14 +46,25 @@ config.accounts = require("./accounts.json");
 
 	// Split accounts into chunks, do "CommendsPerChunk" at a time
 	let chunks = chunkArray(accountsToUse, config.Chunks.CommendsPerChunk);
-	let workerChunks = chunkArray(chunks, config.Chunks.WorkersAtOnce);
+	// let workersPerCall = chunkArray(chunkArray(chunks, config.Chunks.WorkersAtOnce), config.Chunks.WorkersAtOnce);
+	// FIXME: Something above has a logic error
 
 	// Wait 5 seconds before starting the actual process
 	await new Promise(r => setTimeout(r, (5 * 1000)));
 
-	Promise.all(workerChunks.map(w => new WorkerHandler(w, config).execute())).then(() => {
-		console.log("Done");
-	});
+	for (let worker of chunks) {
+		await Promise.all(worker.map(w => new WorkerHandler(w, config).execute())).then((out) => {
+			console.log(out);
+		}).catch((err) => {
+			console.error(err);
+		});
+
+		console.log("Successfully sent commends with " + worker.length + " worker" + (worker.length === 1 ? "" : "s") + ". Waiting " + config.Chunks.TimeBetweenWorkerChunks + "ms");
+
+		await new Promise(r => setTimeout(r, config.Chunks.TimeBetweenWorkerChunks));
+	}
+
+	console.log("Done!");
 })();
 
 // Copied from: https://ourcodeworld.com/articles/read/278/how-to-split-an-array-into-chunks-of-the-same-size-easily-in-javascript
